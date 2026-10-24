@@ -1,0 +1,909 @@
+import os
+import sys
+
+# Script to build Teal theme HTML and Canva-editable PPTX poster for SignBridge
+
+html_content = """<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>SignBridge Research Poster (Teal Theme 24x36in)</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Caveat:wght@600;700&display=swap" rel="stylesheet">
+<style>
+/* ===== PRINT & PAGE SIZE ===== */
+@page { size: 24in 36in; margin: 0; }
+@media print {
+  html, body { width: 24in; height: 36in; }
+  body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+}
+
+:root {
+  --teal-darkest:  #042D29;
+  --teal-dark:     #08443E;
+  --teal-primary:  #0E524B;
+  --teal-medium:   #169888;
+  --teal-light:    #48C9B0;
+  --teal-mint:     #E0F2F1;
+  --teal-bg:       #F2F9F8;
+  --gold-accent:   #D4AF37;
+  --gold-light:    #FFF8E7;
+  --text-dark:     #0F2825;
+  --text-muted:    #2C4A45;
+  --panel-bg:      #FFFFFF;
+  --border-color:  #B2DFDB;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  width: 24in; height: 36in;
+  background: var(--teal-bg);
+  overflow: hidden;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  color: var(--text-dark);
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ===== TOP BANNER ===== */
+.header-banner {
+  background: linear-gradient(135deg, var(--teal-darkest) 0%, var(--teal-dark) 60%, var(--teal-primary) 100%);
+  color: #FFFFFF;
+  padding: 0.4in 0.6in 0.35in 0.6in;
+  display: grid;
+  grid-template-columns: 1.4in 1fr 2.8in;
+  gap: 0.4in;
+  align-items: center;
+  flex-shrink: 0;
+  border-bottom: 0.06in solid var(--teal-medium);
+  box-shadow: 0 0.1in 0.25in rgba(4, 45, 41, 0.3);
+}
+
+.logo-container {
+  width: 1.3in; height: 1.3in;
+  border-radius: 50%;
+  background: radial-gradient(circle, #FFFFFF 0%, var(--teal-mint) 100%);
+  border: 0.04in solid var(--teal-light);
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 0.06in 0.15in rgba(0,0,0,0.2);
+}
+.logo-container svg { width: 0.9in; height: 0.9in; }
+
+.title-box h1 {
+  font-size: 0.65in;
+  font-weight: 900;
+  line-height: 1.1;
+  color: #FFFFFF;
+  letter-spacing: -0.01in;
+  margin-bottom: 0.08in;
+}
+
+.title-box .subtitle {
+  font-size: 0.25in;
+  font-weight: 600;
+  color: var(--teal-light);
+  margin-bottom: 0.1in;
+}
+
+.team-meta {
+  font-size: 0.2in;
+  line-height: 1.4;
+  color: #E0F2F1;
+}
+.team-meta .authors { font-weight: 700; color: #FFFFFF; margin-bottom: 0.04in; }
+.team-meta .guide { color: var(--teal-mint); opacity: 0.9; }
+
+.tagline-box {
+  text-align: right;
+  font-family: 'Caveat', cursive;
+  font-size: 0.32in;
+  line-height: 1.25;
+  color: var(--teal-light);
+  border-left: 2px solid rgba(255,255,255,0.2);
+  padding-left: 0.25in;
+}
+
+/* ===== MAIN POSTER BODY ===== */
+.poster-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 0.25in 0.45in;
+  gap: 0.2in;
+}
+
+.row {
+  display: flex;
+  gap: 0.2in;
+  width: 100%;
+}
+
+.flex-1 { flex: 1; }
+.flex-1-2 { flex: 1.2; }
+.flex-1-4 { flex: 1.4; }
+.flex-1-5 { flex: 1.5; }
+.flex-1-8 { flex: 1.8; }
+.flex-2 { flex: 2; }
+.flex-2-5 { flex: 2.5; }
+
+/* ===== PANELS ===== */
+.panel {
+  background: var(--panel-bg);
+  border-radius: 0.1in;
+  border: 1.5px solid var(--border-color);
+  box-shadow: 0 0.04in 0.12in rgba(14, 82, 75, 0.06);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.panel-header {
+  background: var(--teal-primary);
+  color: #FFFFFF;
+  padding: 0.1in 0.2in;
+  font-size: 0.22in;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.02in;
+  display: flex;
+  align-items: center;
+  gap: 0.1in;
+  border-bottom: 3px solid var(--teal-medium);
+  flex-shrink: 0;
+}
+.panel-header .icon { font-size: 0.24in; }
+
+.panel-body {
+  padding: 0.18in 0.2in;
+  font-size: 0.19in;
+  line-height: 1.45;
+  color: var(--text-muted);
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+/* Bullets */
+ul.teal-bullets {
+  list-style: none;
+  padding-left: 0.24in;
+  margin: 0;
+}
+ul.teal-bullets li {
+  position: relative;
+  margin-bottom: 0.08in;
+  line-height: 1.42;
+  text-align: justify;
+  color: var(--text-dark);
+}
+ul.teal-bullets li::before {
+  content: "•";
+  color: var(--teal-medium);
+  font-size: 0.28in;
+  position: absolute;
+  left: -0.22in;
+  top: -0.04in;
+}
+
+/* Workflow Flowchart */
+.workflow-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 0.08in;
+  align-items: center;
+  text-align: center;
+}
+.workflow-step {
+  background: var(--teal-bg);
+  border: 1.5px solid var(--border-color);
+  border-radius: 0.08in;
+  padding: 0.1in 0.06in;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.workflow-icon {
+  width: 0.45in; height: 0.45in;
+  border-radius: 50%;
+  background: var(--teal-primary);
+  color: #FFFFFF;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.22in;
+  margin-bottom: 0.06in;
+}
+.workflow-title { font-size: 0.16in; font-weight: 800; color: var(--teal-dark); }
+.workflow-sub { font-size: 0.13in; color: var(--text-muted); margin-top: 0.02in; }
+
+.arrow-divider {
+  font-size: 0.22in; color: var(--teal-medium); font-weight: 900; text-align: center;
+}
+
+/* Sample Hand Gestures */
+.sample-gestures-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.12in;
+  margin-top: 0.08in;
+}
+.gesture-card {
+  border: 1px solid var(--border-color);
+  border-radius: 0.06in;
+  padding: 0.08in;
+  background: #FFFFFF;
+}
+.gesture-card-title {
+  font-size: 0.15in;
+  font-weight: 700;
+  color: var(--teal-dark);
+  padding: 0.04in 0.08in;
+  background: var(--teal-mint);
+  border-radius: 0.04in;
+  margin-bottom: 0.06in;
+  text-align: center;
+}
+.gesture-emojis {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 0.04in;
+  font-size: 0.22in;
+  text-align: center;
+}
+
+/* Tables */
+table.teal-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.17in;
+  text-align: center;
+}
+table.teal-table th {
+  background: var(--teal-primary);
+  color: #FFFFFF;
+  padding: 0.08in 0.06in;
+  font-weight: 700;
+  font-size: 0.16in;
+}
+table.teal-table td {
+  padding: 0.07in 0.06in;
+  border-bottom: 1px solid var(--border-color);
+}
+table.teal-table tr:nth-child(even) td {
+  background: var(--teal-bg);
+}
+table.teal-table tr.highlight td {
+  background: var(--teal-mint);
+  font-weight: 800;
+  color: var(--teal-darkest);
+}
+
+/* Model Architecture Visual */
+.arch-flow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.06in;
+  background: var(--teal-bg);
+  padding: 0.1in;
+  border-radius: 0.08in;
+  border: 1px solid var(--border-color);
+}
+.arch-box {
+  flex: 1;
+  background: #FFFFFF;
+  border: 1.5px solid var(--teal-medium);
+  border-radius: 0.06in;
+  padding: 0.08in 0.04in;
+  text-align: center;
+}
+.arch-box .lbl { font-size: 0.14in; font-weight: 800; color: var(--teal-dark); }
+.arch-box .sub { font-size: 0.11in; color: var(--text-muted); }
+
+/* Parameter Cards Grid */
+.params-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.1in;
+}
+.param-card {
+  background: var(--teal-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 0.06in;
+  padding: 0.08in;
+  text-align: center;
+}
+.param-card .val { font-size: 0.22in; font-weight: 900; color: var(--teal-primary); }
+.param-card .lbl { font-size: 0.13in; font-weight: 700; color: var(--text-muted); }
+
+/* Contributions List */
+.contrib-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.08in;
+}
+.contrib-item {
+  display: flex;
+  align-items: center;
+  gap: 0.12in;
+  background: var(--teal-bg);
+  padding: 0.08in 0.12in;
+  border-radius: 0.06in;
+  border-left: 4px solid var(--teal-medium);
+}
+.contrib-num {
+  width: 0.35in; height: 0.35in;
+  border-radius: 50%;
+  background: var(--teal-primary);
+  color: #FFFFFF;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 800; font-size: 0.16in;
+  flex-shrink: 0;
+}
+.contrib-text { font-size: 0.16in; font-weight: 600; color: var(--text-dark); }
+
+/* Bar Chart */
+.chart-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.08in;
+}
+.chart-row {
+  display: flex;
+  align-items: center;
+  gap: 0.1in;
+}
+.chart-label { width: 1.2in; font-size: 0.14in; font-weight: 700; text-align: right; }
+.chart-bar-bg { flex: 1; height: 0.26in; background: var(--teal-mint); border-radius: 0.13in; overflow: hidden; position: relative; }
+.chart-bar-fill { height: 100%; border-radius: 0.13in; display: flex; align-items: center; justify-content: flex-end; padding-right: 0.08in; color: #FFFFFF; font-size: 0.13in; font-weight: 800; }
+
+/* Checklist */
+ul.check-list { list-style: none; padding: 0; margin: 0; }
+ul.check-list li {
+  position: relative; padding-left: 0.25in; margin-bottom: 0.06in; font-size: 0.16in; color: var(--text-dark);
+}
+ul.check-list li::before {
+  content: "✔"; color: var(--teal-medium); position: absolute; left: 0; font-weight: 900;
+}
+
+/* SDG Cards */
+.sdg-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.08in;
+  margin-top: 0.06in;
+}
+.sdg-card {
+  padding: 0.06in;
+  border-radius: 0.04in;
+  color: #FFFFFF;
+  text-align: center;
+  font-size: 0.12in;
+  font-weight: 800;
+}
+.sdg-3 { background: #4C9F38; }
+.sdg-4 { background: #C5192D; }
+.sdg-10 { background: #DD1367; }
+.sdg-17 { background: #19486A; }
+
+/* Bottom Footer */
+.footer {
+  background: var(--teal-darkest);
+  color: var(--teal-mint);
+  padding: 0.15in 0.6in;
+  text-align: center;
+  font-size: 0.22in;
+  font-weight: 700;
+  letter-spacing: 0.02in;
+  border-top: 0.04in solid var(--teal-medium);
+  flex-shrink: 0;
+}
+
+</style>
+</head>
+<body>
+
+<!-- TOP BANNER -->
+<header class="header-banner">
+  <div class="logo-container">
+    <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="50" cy="50" r="45" stroke="#0E524B" stroke-width="4" fill="#E0F2F1"/>
+      <path d="M30 65 C 30 45, 45 35, 50 35 C 55 35, 70 45, 70 65" stroke="#0E524B" stroke-width="6" stroke-linecap="round"/>
+      <path d="M25 50 Q 50 20 75 50" stroke="#169888" stroke-width="5" fill="none"/>
+      <circle cx="50" cy="35" r="6" fill="#0E524B"/>
+    </svg>
+  </div>
+  <div class="title-box">
+    <h1>SignBridge</h1>
+    <div class="subtitle">A Real-Time Bidirectional Sign Language Communication System with a Unique Hand Gesture Dataset</div>
+    <div class="team-meta">
+      <div class="authors">Likhitha (4SF24CS093) • Samiksha Naik (4SF24CS179) • Pooja A S (4SF24CS133) • Priyanka (4SF24CS153)</div>
+      <div class="guide">Guide: Mrs. Suketha, Assistant Professor, Department of CSE | Sahyadri College of Engineering & Management, Mangaluru • VTU 2026–27</div>
+    </div>
+  </div>
+  <div class="tagline-box">
+    Different Hands<br>Same Language<br>A Brighter Future
+  </div>
+</header>
+
+<!-- MAIN POSTER BODY -->
+<div class="poster-body">
+
+  <!-- ROW 1: MOTIVATION & WORKFLOW -->
+  <div class="row">
+    <!-- 1. MOTIVATION -->
+    <div class="panel flex-1">
+      <div class="panel-header"><span class="icon">💡</span> 1. MOTIVATION</div>
+      <div class="panel-body">
+        <ul class="teal-bullets">
+          <li>Sign language is a powerful and essential means of communication, breaking down barriers for individuals who are speech &amp; hearing-impaired.</li>
+          <li>The primary objective is to address the need for robust Indian Sign Language (ISL) recognition in diverse environments, including self-created datasets and benchmark data.</li>
+          <li>Leverages CNN and LSTM to enhance recognition performance with higher accuracy, robustness and faster training.</li>
+          <li>Provides an alternative to traditional ML and standalone CNNs by combining spatial and temporal feature learning.</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- 2. HOW SIGNBRIDGE WORKS (WORKFLOW) -->
+    <div class="panel flex-1-8">
+      <div class="panel-header"><span class="icon">👥</span> 2. HOW SIGNBRIDGE WORKS (WORKFLOW)</div>
+      <div class="panel-body">
+        <div class="workflow-grid">
+          <div class="workflow-step">
+            <div class="workflow-icon">👤</div>
+            <div class="workflow-title">User</div>
+            <div class="workflow-sub">(Shows gesture)</div>
+          </div>
+          <div class="arrow-divider">➔</div>
+          <div class="workflow-step">
+            <div class="workflow-icon">📷</div>
+            <div class="workflow-title">Camera</div>
+            <div class="workflow-sub">(Captures video/ image stream)</div>
+          </div>
+          <div class="arrow-divider">➔</div>
+          <div class="workflow-step">
+            <div class="workflow-icon">⚙️</div>
+            <div class="workflow-title">Preprocessing</div>
+            <div class="workflow-sub">(Hand isolation, resize, normalize)</div>
+          </div>
+          <div class="arrow-divider">➔</div>
+          <div class="workflow-step">
+            <div class="workflow-icon">🧠</div>
+            <div class="workflow-title">CNN + LSTM</div>
+            <div class="workflow-sub">(Feature extraction + sequence modeling)</div>
+          </div>
+          <div class="arrow-divider">➔</div>
+          <div class="workflow-step">
+            <div class="workflow-icon">📋</div>
+            <div class="workflow-title">Classification</div>
+            <div class="workflow-sub">(26 classes)</div>
+          </div>
+          <div class="arrow-divider">➔</div>
+          <div class="workflow-step">
+            <div class="workflow-icon">💬</div>
+            <div class="workflow-title">Output</div>
+            <div class="workflow-sub">(Text/Audio communication)</div>
+          </div>
+        </div>
+
+        <!-- Sample Hand Gestures -->
+        <div style="font-size: 0.16in; font-weight: 800; color: var(--teal-dark); margin-top: 0.1in;">SAMPLE HAND GESTURES (Emoji Representation)</div>
+        <div class="sample-gestures-grid">
+          <div class="gesture-card">
+            <div class="gesture-card-title">Dataset I – Self Created (Simple)</div>
+            <div class="gesture-emojis">
+              <span>🖐️</span><span>✌️</span><span>👈</span><span>👍</span><span>✊</span><span>🤟</span>
+              <span>👌</span><span>👆</span><span>🤌</span><span>🤛</span><span>🤜</span><span>👏</span>
+            </div>
+          </div>
+          <div class="gesture-card">
+            <div class="gesture-card-title">Dataset II – Studio (Uniform)</div>
+            <div class="gesture-emojis">
+              <span>🤏</span><span>🫵</span><span>🖐️</span><span>🤙</span><span>🤞</span><span>🖖</span>
+              <span>✋</span><span>👊</span><span>👉</span><span>👈</span><span>☝️</span><span>👇</span>
+            </div>
+          </div>
+          <div class="gesture-card">
+            <div class="gesture-card-title">Dataset III – Complex (Non-uniform)</div>
+            <div class="gesture-emojis">
+              <span>🤟</span><span>🤝</span><span>✍️</span><span>🙏</span><span>👋</span><span>👐</span>
+              <span>🤲</span><span>🙌</span><span>💪</span><span>🤳</span><span>💅</span><span>🤳</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ROW 2: DATASET OVERVIEW, PREPROCESSING, MODEL ARCHITECTURE -->
+  <div class="row">
+    <!-- 3. DATASET OVERVIEW & COMPARISON -->
+    <div class="panel flex-1">
+      <div class="panel-header"><span class="icon">📊</span> 3. DATASET OVERVIEW &amp; COMPARISON</div>
+      <div class="panel-body">
+        <table class="teal-table">
+          <thead>
+            <tr>
+              <th>Dataset</th>
+              <th>Background</th>
+              <th>Environment</th>
+              <th>Purpose</th>
+              <th>Classes</th>
+              <th>Images</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><b>Dataset I</b></td>
+              <td>Simple</td>
+              <td>Controlled</td>
+              <td>Self-created ISL</td>
+              <td>26</td>
+              <td>5,200</td>
+            </tr>
+            <tr>
+              <td><b>Dataset II</b></td>
+              <td>Simple studio</td>
+              <td>Uniform lighting &amp; mask</td>
+              <td>Benchmark / comparison</td>
+              <td>26</td>
+              <td>-</td>
+            </tr>
+            <tr>
+              <td><b>Dataset III</b></td>
+              <td>Complex</td>
+              <td>Low light / non-uniform</td>
+              <td>Robustness evaluation</td>
+              <td>26</td>
+              <td>-</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 4. PREPROCESSING (HAND ISOLATION) -->
+    <div class="panel flex-1">
+      <div class="panel-header"><span class="icon">🔍</span> 4. PREPROCESSING (HAND ISOLATION)</div>
+      <div class="panel-body">
+        <div style="display: flex; align-items: center; justify-content: space-around; background: var(--teal-bg); padding: 0.1in; border-radius: 0.08in;">
+          <div style="text-align: center;">
+            <div style="font-size: 0.35in;">🖐️</div>
+            <div style="font-size: 0.13in; font-weight: 700;">Original Image</div>
+          </div>
+          <div style="font-size: 0.2in; color: var(--teal-medium);">➔</div>
+          <div style="text-align: center;">
+            <div style="font-size: 0.35in;">⬛</div>
+            <div style="font-size: 0.13in; font-weight: 700;">Background Removal</div>
+          </div>
+          <div style="font-size: 0.2in; color: var(--teal-medium);">➔</div>
+          <div style="text-align: center;">
+            <div style="font-size: 0.35in;">✂️</div>
+            <div style="font-size: 0.13in; font-weight: 700;">Hand ROI (Cropped)</div>
+          </div>
+          <div style="font-size: 0.2in; color: var(--teal-medium);">➔</div>
+          <div style="text-align: center;">
+            <div style="font-size: 0.35in;">🖼️</div>
+            <div style="font-size: 0.13in; font-weight: 700;">Resized (224 × 224)</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 5. MODEL ARCHITECTURE (CNN + LSTM) -->
+    <div class="panel flex-1-2">
+      <div class="panel-header"><span class="icon">🧬</span> 5. MODEL ARCHITECTURE (CNN + LSTM)</div>
+      <div class="panel-body">
+        <div class="arch-flow">
+          <div class="arch-box">
+            <div class="lbl">Input</div>
+            <div class="sub">(224 × 224)</div>
+          </div>
+          <div style="color: var(--teal-medium); font-weight: 900;">➔</div>
+          <div class="arch-box">
+            <div class="lbl">CNN</div>
+            <div class="sub">Conv2D + MaxPool</div>
+          </div>
+          <div style="color: var(--teal-medium); font-weight: 900;">➔</div>
+          <div class="arch-box">
+            <div class="lbl">Feature Vector</div>
+            <div class="sub">512D Embedding</div>
+          </div>
+          <div style="color: var(--teal-medium); font-weight: 900;">➔</div>
+          <div class="arch-box">
+            <div class="lbl">LSTM</div>
+            <div class="sub">128 Units</div>
+          </div>
+          <div style="color: var(--teal-medium); font-weight: 900;">➔</div>
+          <div class="arch-box">
+            <div class="lbl">MLP</div>
+            <div class="sub">Dense Layer</div>
+          </div>
+          <div style="color: var(--teal-medium); font-weight: 900;">➔</div>
+          <div class="arch-box" style="background: var(--teal-primary); color: #FFFFFF;">
+            <div class="lbl" style="color: #FFFFFF;">Softmax</div>
+            <div class="sub" style="color: var(--teal-mint);">26 Classes</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ROW 3: WHY CNN+LSTM, PARAMETERS, CONTRIBUTIONS -->
+  <div class="row">
+    <!-- 6. WHY CNN + LSTM? -->
+    <div class="panel flex-1-4">
+      <div class="panel-header"><span class="icon">⚡</span> 6. WHY CNN + LSTM?</div>
+      <div class="panel-body">
+        <div style="display: flex; gap: 0.1in; align-items: center;">
+          <div style="flex: 1; background: var(--teal-bg); border: 1.5px solid var(--teal-medium); border-radius: 0.08in; padding: 0.1in;">
+            <div style="font-weight: 800; color: var(--teal-dark); font-size: 0.16in; margin-bottom: 0.04in;">CNN – Spatial Feature Extraction</div>
+            <ul class="teal-bullets" style="font-size: 0.15in;">
+              <li>Learns hand shape, edges, visual features</li>
+              <li>Converts image to 512-D feature vector</li>
+              <li>Works well with variations in background &amp; lighting</li>
+            </ul>
+          </div>
+          <div style="font-size: 0.25in; font-weight: 900; color: var(--teal-medium);">+</div>
+          <div style="flex: 1; background: var(--teal-mint); border: 1.5px solid var(--teal-primary); border-radius: 0.08in; padding: 0.1in;">
+            <div style="font-weight: 800; color: var(--teal-darkest); font-size: 0.16in; margin-bottom: 0.04in;">LSTM – Temporal Sequence Modeling</div>
+            <ul class="teal-bullets" style="font-size: 0.15in;">
+              <li>Captures frame-to-frame changes</li>
+              <li>Learns gesture sequence</li>
+              <li>Handles long-range dependencies</li>
+            </ul>
+          </div>
+        </div>
+        <div style="background: var(--teal-primary); color: #FFFFFF; text-align: center; padding: 0.06in; border-radius: 0.06in; font-weight: 800; font-size: 0.15in; margin-top: 0.08in;">
+          = Better Accuracy + Robustness + Real-time Performance
+        </div>
+      </div>
+    </div>
+
+    <!-- 7. MODEL PARAMETERS -->
+    <div class="panel flex-1">
+      <div class="panel-header"><span class="icon">⚙️</span> 7. MODEL PARAMETERS</div>
+      <div class="panel-body">
+        <div class="params-grid">
+          <div class="param-card">
+            <div class="val">224 × 224</div>
+            <div class="lbl">Input Size</div>
+          </div>
+          <div class="param-card">
+            <div class="val">512 / 768</div>
+            <div class="lbl">Embedding Dim</div>
+          </div>
+          <div class="param-card">
+            <div class="val">128</div>
+            <div class="lbl">LSTM Units</div>
+          </div>
+          <div class="param-card">
+            <div class="val">0.3</div>
+            <div class="lbl">Dropout</div>
+          </div>
+          <div class="param-card">
+            <div class="val">32</div>
+            <div class="lbl">Batch Size</div>
+          </div>
+          <div class="param-card">
+            <div class="val">10 / 20 / 50</div>
+            <div class="lbl">Epochs</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 8. KEY CONTRIBUTIONS -->
+    <div class="panel flex-1-2">
+      <div class="panel-header"><span class="icon">🏆</span> 8. KEY CONTRIBUTIONS</div>
+      <div class="panel-body">
+        <div class="contrib-list">
+          <div class="contrib-item">
+            <div class="contrib-num">01</div>
+            <div class="contrib-text">Self-created ISL gesture dataset (26 classes, 5,200 images)</div>
+          </div>
+          <div class="contrib-item">
+            <div class="contrib-num">02</div>
+            <div class="contrib-text">Evaluation across simple and non-uniform environments</div>
+          </div>
+          <div class="contrib-item">
+            <div class="contrib-num">03</div>
+            <div class="contrib-text">CNN + LSTM spatial-temporal modelling</div>
+          </div>
+          <div class="contrib-item">
+            <div class="contrib-num">04</div>
+            <div class="contrib-text">High accuracy up to 100% (Dataset II)</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ROW 4: PERFORMANCE ANALYSIS & REAL-WORLD ENVIRONMENTS -->
+  <div class="row">
+    <!-- 9. PERFORMANCE ANALYSIS -->
+    <div class="panel flex-2">
+      <div class="panel-header"><span class="icon">📈</span> 9. PERFORMANCE ANALYSIS</div>
+      <div class="panel-body">
+        <div class="row">
+          <!-- (a) Bar Chart -->
+          <div class="flex-1" style="border-right: 1px solid var(--border-color); padding-right: 0.15in;">
+            <div style="font-size: 0.15in; font-weight: 800; color: var(--teal-dark); margin-bottom: 0.08in;">(a) Accuracy Comparison Across Datasets</div>
+            <div class="chart-container">
+              <div class="chart-row">
+                <div class="chart-label">Dataset I</div>
+                <div class="chart-bar-bg">
+                  <div class="chart-bar-fill" style="width: 98.5%; background: var(--teal-primary);">98.5%</div>
+                </div>
+              </div>
+              <div class="chart-row">
+                <div class="chart-label">Dataset II</div>
+                <div class="chart-bar-bg">
+                  <div class="chart-bar-fill" style="width: 100%; background: var(--teal-medium);">100%</div>
+                </div>
+              </div>
+              <div class="chart-row">
+                <div class="chart-label">Dataset III</div>
+                <div class="chart-bar-bg">
+                  <div class="chart-bar-fill" style="width: 99.8%; background: var(--teal-light);">99.8%</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- (b) Table -->
+          <div class="flex-1-4" style="padding-left: 0.15in;">
+            <div style="font-size: 0.15in; font-weight: 800; color: var(--teal-dark); margin-bottom: 0.08in;">(b) State-of-the-Art Comparison</div>
+            <table class="teal-table">
+              <thead>
+                <tr>
+                  <th>Dataset</th>
+                  <th>Methodology</th>
+                  <th>Accuracy (Existing)</th>
+                  <th>Accuracy (Proposed)</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><b>Dataset I</b></td>
+                  <td>HU Moments + GLCM + Random Forest</td>
+                  <td>98.0%</td>
+                  <td><b>98.5%</b></td>
+                </tr>
+                <tr>
+                  <td><b>Dataset II</b></td>
+                  <td>Deep Vision Transformers</td>
+                  <td>99.29%</td>
+                  <td><b>100%</b></td>
+                </tr>
+                <tr class="highlight">
+                  <td><b>Dataset III</b></td>
+                  <td>CNN</td>
+                  <td>99.56%</td>
+                  <td><b>99.8%</b></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 10. REAL-WORLD ENVIRONMENTS -->
+    <div class="panel flex-1">
+      <div class="panel-header"><span class="icon">🌐</span> 10. REAL-WORLD ENVIRONMENTS</div>
+      <div class="panel-body">
+        <div style="display: flex; gap: 0.1in;">
+          <div style="flex: 1; background: var(--teal-bg); border-radius: 0.06in; padding: 0.08in; text-align: center;">
+            <div style="font-size: 0.35in;">🖐️</div>
+            <div style="font-size: 0.14in; font-weight: 800; color: var(--teal-dark);">Simple Background</div>
+            <div style="font-size: 0.11in; color: var(--text-muted);">(Studio + Uniform Lighting)</div>
+          </div>
+          <div style="flex: 1; background: var(--teal-mint); border-radius: 0.06in; padding: 0.08in; text-align: center;">
+            <div style="font-size: 0.35in;">🌳</div>
+            <div style="font-size: 0.14in; font-weight: 800; color: var(--teal-darkest);">Complex Background</div>
+            <div style="font-size: 0.11in; color: var(--text-muted);">(Low Light / Non-uniform)</div>
+          </div>
+        </div>
+        <div style="text-align: center; font-size: 0.13in; color: var(--text-muted); margin-top: 0.06in;">
+          Testing across controlled and non-uniform environments
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ROW 5: SCOPE & IMPACT, LIMITATIONS & FUTURE WORK, CONCLUSION & REFS -->
+  <div class="row">
+    <!-- 11. SCOPE & SOCIETAL IMPACT -->
+    <div class="panel flex-1">
+      <div class="panel-header"><span class="icon">🌍</span> 11. SCOPE &amp; SOCIETAL IMPACT</div>
+      <div class="panel-body">
+        <div style="font-weight: 800; color: var(--teal-dark); font-size: 0.15in; margin-bottom: 0.04in;">Scope</div>
+        <ul class="check-list">
+          <li>Real-time sign language recognition</li>
+          <li>Supports both static &amp; dynamic gestures</li>
+          <li>Can be extended to multiple languages</li>
+          <li>Potential for mobile and wearable devices</li>
+        </ul>
+        <div style="font-weight: 800; color: var(--teal-dark); font-size: 0.15in; margin-top: 0.08in; margin-bottom: 0.04in;">Societal Impact</div>
+        <ul class="check-list">
+          <li>Empowers speech &amp; hearing-impaired community</li>
+          <li>Improves accessibility and inclusion</li>
+          <li>Bridges communication gaps</li>
+          <li>Supports education &amp; workplace accessibility</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- 12. LIMITATIONS & FUTURE WORK -->
+    <div class="panel flex-1">
+      <div class="panel-header"><span class="icon">🚀</span> 12. LIMITATIONS &amp; FUTURE WORK</div>
+      <div class="panel-body">
+        <div style="font-weight: 800; color: var(--teal-dark); font-size: 0.15in; margin-bottom: 0.04in;">➔ Limitations</div>
+        <ul class="teal-bullets" style="font-size: 0.14in;">
+          <li>Limited dataset size</li>
+          <li>Only 26 classes (A–Z)</li>
+          <li>Focus on static gestures</li>
+          <li>Performance may vary in extreme real-world conditions</li>
+        </ul>
+        <div style="font-weight: 800; color: var(--teal-dark); font-size: 0.15in; margin-top: 0.08in; margin-bottom: 0.04in;">➔ Future Work</div>
+        <ul class="teal-bullets" style="font-size: 0.14in;">
+          <li>Increase dataset size and diversity</li>
+          <li>Include dynamic gestures &amp; sentences</li>
+          <li>Improve real-time deployment</li>
+          <li>Extend to multi-language recognition</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- 13. CONCLUSION & REFERENCES -->
+    <div class="panel flex-1-5">
+      <div class="panel-header"><span class="icon">📌</span> 13. CONCLUSION &amp; REFERENCES</div>
+      <div class="panel-body">
+        <div style="font-weight: 800; color: var(--teal-dark); font-size: 0.15in; margin-bottom: 0.04in;">13. CONCLUSION</div>
+        <p style="font-size: 0.15in; line-height: 1.4; color: var(--text-dark); margin-bottom: 0.08in; text-align: justify;">
+          The proposed <b>CNN-LSTM</b> architecture for static ISL recognition is a promising solution for the speech and hearing-impaired community. It achieves high accuracy, works in diverse environments, and ensures efficient training with fewer epochs.
+        </p>
+
+        <div style="font-weight: 800; color: var(--teal-dark); font-size: 0.15in; margin-top: 0.06in; margin-bottom: 0.04in;">14. REFERENCES</div>
+        <div style="font-size: 0.13in; line-height: 1.35; color: var(--text-muted);">
+          1. A. O. Hashi et al., "A systematic review of hand gesture recognition," <i>IEEE Access</i>, vol. 12, pp. 143603–143623, 2024.<br>
+          2. U. Rastogi et al., "Advancements in Machine Learning for Gesture Recognition," <i>Journal of Computer Vision and AI</i>, 2023.
+        </div>
+
+        <!-- UN SDGs -->
+        <div style="margin-top: 0.08in; border-top: 1px solid var(--border-color); padding-top: 0.06in;">
+          <div style="font-size: 0.12in; font-weight: 800; color: var(--teal-dark); text-align: center;">Aligned with United Nations Sustainable Development Goals</div>
+          <div class="sdg-grid">
+            <div class="sdg-card sdg-3">3 GOOD HEALTH</div>
+            <div class="sdg-card sdg-4">4 QUALITY EDUCATION</div>
+            <div class="sdg-card sdg-10">10 REDUCED INEQUALITIES</div>
+            <div class="sdg-card sdg-17">17 PARTNERSHIPS</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- FOOTER -->
+<footer class="footer">
+  "SignBridge – Connecting People Beyond Words"
+</footer>
+
+</body>
+</html>
+"""
+
+html_path = r"c:\Users\Admin\Desktop\Poster\SignBridge_Poster_24x36_Teal_Canva_Editable.html"
+with open(html_path, "w", encoding="utf-8") as f:
+    f.write(html_content)
+
+print("HTML file written successfully to:", html_path)
